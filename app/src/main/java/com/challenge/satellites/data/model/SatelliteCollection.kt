@@ -3,8 +3,7 @@
  * Reproduction is forbidden without written approval of Sensormatic Electronics, LLC.
  */
 
-package com.challenge.satellites
-
+package com.challenge.satellites.data.model
 
 import com.google.gson.annotations.SerializedName
 
@@ -21,7 +20,7 @@ data class SatelliteCollection(
         @SerializedName("offset") val date: String = "",
         @SerializedName("@id") val id: String = "",
         @SerializedName("line2") val line2: String = "",
-        @SerializedName("line") val line1: String = line2,
+        @SerializedName("line1") val line1: String = "",
         @SerializedName("name") val name: String = "",
         @SerializedName("satelliteId") val satelliteId: Int = 0,
         @SerializedName("@type") val type: String = ""

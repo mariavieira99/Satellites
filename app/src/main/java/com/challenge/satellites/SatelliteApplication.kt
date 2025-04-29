@@ -5,10 +5,8 @@
 
 package com.challenge.satellites
 
-import retrofit2.Response
-import retrofit2.http.GET
+import android.app.Application
+import dagger.hilt.android.HiltAndroidApp
 
-interface TleApi {
-    @GET("tle")
-    suspend fun getCollection(): Response<SatelliteCollection>
-}
+@HiltAndroidApp
+class SatelliteApplication: Application()
