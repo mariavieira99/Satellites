@@ -11,6 +11,7 @@ import com.challenge.satellites.data.model.SatelliteCollection
 import com.challenge.satellites.domain.repository.SatelliteRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.net.SocketTimeoutException
 import javax.inject.Inject
 
 private const val TAG = "SatelliteRepositoryImpl"
@@ -20,6 +21,9 @@ class SatelliteRepositoryImpl @Inject constructor(private val api: TleApi) : Sat
     override suspend fun getSatellites(): SatelliteCollection? = withContext(Dispatchers.IO) {
         try {
             api.getCollection()
+        } catch (e: SocketTimeoutException) {
+            Log.e(TAG, "Request timed out=$e")
+            return@withContext null
         } catch (e: Exception) {
             Log.e(TAG, "Exception caught=$e")
             return@withContext null
@@ -30,6 +34,9 @@ class SatelliteRepositoryImpl @Inject constructor(private val api: TleApi) : Sat
         withContext(Dispatchers.IO) {
             try {
                 api.getSatelliteById(satelliteId)
+            } catch (e: SocketTimeoutException) {
+                Log.e(TAG, "Request timed out=$e")
+                return@withContext null
             } catch (e: Exception) {
                 Log.e(TAG, "Exception caught=$e")
                 return@withContext null
