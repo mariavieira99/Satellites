@@ -9,4 +9,6 @@ import com.challenge.satellites.data.model.SatelliteCollection
 
 interface SatelliteRepository {
     suspend fun getSatellites(): SatelliteCollection?
+
+    suspend fun getSatelliteById(satelliteId: Int): SatelliteCollection.Member?
 }

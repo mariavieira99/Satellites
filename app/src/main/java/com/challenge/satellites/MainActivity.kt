@@ -6,7 +6,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.challenge.satellites.presentation.screens.SatelliteDetailScreen
 import com.challenge.satellites.presentation.screens.SatelliteScreen
 import com.challenge.satellites.ui.theme.SatellitesTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -18,9 +25,35 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SatellitesTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    SatelliteScreen(innerPadding)
-                }
+                SatelliteApp()
+            }
+        }
+    }
+}
+
+@Composable
+fun SatelliteApp() {
+    val navController = rememberNavController()
+
+    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+        NavHost(navController = navController, startDestination = "satellites_list") {
+            composable(route = "satellites_list") {
+                SatelliteScreen(innerPadding = innerPadding, onItemClickedCallback = {
+                    navController.navigate("satellite_details/$it")
+                })
+            }
+
+            composable(
+                route = "satellite_details/{id}",
+                arguments = listOf(navArgument(name = "id") {
+                    type = NavType.IntType
+                })
+            ) { navBackStack ->
+                val id = navBackStack.arguments?.getInt("id") ?: return@composable
+
+                SatelliteDetailScreen(id, backClickCallback = {
+                    navController.navigateUp()
+                })
             }
         }
     }

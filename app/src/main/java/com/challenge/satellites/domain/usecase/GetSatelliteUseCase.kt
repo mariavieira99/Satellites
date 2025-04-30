@@ -11,7 +11,11 @@ import javax.inject.Inject
 
 class GetSatelliteUseCase @Inject constructor(private val repository: SatelliteRepository) {
 
-    suspend operator fun invoke(): SatelliteCollection? {
+    suspend fun getSatellites(): SatelliteCollection? {
         return repository.getSatellites()
+    }
+
+    suspend fun getSatelliteById(satelliteId: Int): SatelliteCollection.Member? {
+        return repository.getSatelliteById(satelliteId)
     }
 }

@@ -17,7 +17,7 @@ data class SatelliteCollection(
     @SerializedName("view") val view: View = View()
 ) {
     data class Member(
-        @SerializedName("offset") val date: String = "",
+        @SerializedName("date") val date: String = "",
         @SerializedName("@id") val id: String = "",
         @SerializedName("line2") val line2: String = "",
         @SerializedName("line1") val line1: String = "",

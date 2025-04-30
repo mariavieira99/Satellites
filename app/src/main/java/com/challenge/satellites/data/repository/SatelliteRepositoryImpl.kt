@@ -25,4 +25,14 @@ class SatelliteRepositoryImpl @Inject constructor(private val api: TleApi) : Sat
             return@withContext null
         }
     }
+
+    override suspend fun getSatelliteById(satelliteId: Int): SatelliteCollection.Member? =
+        withContext(Dispatchers.IO) {
+            try {
+                api.getSatelliteById(satelliteId)
+            } catch (e: Exception) {
+                Log.e(TAG, "Exception caught=$e")
+                return@withContext null
+            }
+        }
 }
