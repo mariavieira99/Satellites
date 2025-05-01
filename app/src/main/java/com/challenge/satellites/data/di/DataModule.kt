@@ -5,10 +5,16 @@
 
 package com.challenge.satellites.data.di
 
+import android.content.Context
+import androidx.room.Room
 import com.challenge.satellites.data.api.TleApi
+import com.challenge.satellites.data.local.SatelliteDatabase
+import com.challenge.satellites.data.repository.SatelliteRepositoryImpl
+import com.challenge.satellites.domain.repository.SatelliteRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -18,7 +24,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object NetworkModule {
+object DataModule {
     private const val BASE_URL = "https://tle.ivanstanojevic.me/api/"
 
     @Provides
@@ -44,4 +50,15 @@ object NetworkModule {
     fun provideMusicApi(retrofit: Retrofit): TleApi {
         return retrofit.create(TleApi::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun provideDatabase(@ApplicationContext context: Context): SatelliteDatabase =
+        Room.databaseBuilder(context, SatelliteDatabase::class.java, "satellite_db").build()
+
+
+    @Provides
+    @Singleton
+    fun provideSatelliteRepository(api: TleApi, db: SatelliteDatabase): SatelliteRepository =
+        SatelliteRepositoryImpl(api, db)
 }

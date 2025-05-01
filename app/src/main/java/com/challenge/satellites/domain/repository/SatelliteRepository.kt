@@ -5,10 +5,11 @@
 
 package com.challenge.satellites.domain.repository
 
-import com.challenge.satellites.data.model.SatelliteCollection
+import com.challenge.satellites.data.api.QueryParameters
+import com.challenge.satellites.domain.model.Satellite
 
 interface SatelliteRepository {
-    suspend fun getSatellites(): SatelliteCollection?
+    suspend fun getSatellites(queryParameters: QueryParameters): List<Satellite>
 
-    suspend fun getSatelliteById(satelliteId: Int): SatelliteCollection.Member?
+    suspend fun getSatelliteById(satelliteId: Int): Satellite?
 }

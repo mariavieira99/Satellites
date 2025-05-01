@@ -3,7 +3,7 @@
  * Reproduction is forbidden without written approval of Sensormatic Electronics, LLC.
  */
 
-package com.challenge.satellites.data.model
+package com.challenge.satellites.data.api
 
 import com.google.gson.annotations.SerializedName
 

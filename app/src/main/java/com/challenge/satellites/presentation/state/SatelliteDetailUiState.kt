@@ -5,10 +5,10 @@
 
 package com.challenge.satellites.presentation.state
 
-import com.challenge.satellites.data.model.SatelliteCollection
+import com.challenge.satellites.domain.model.Satellite
 
 sealed class SatelliteDetailUiState {
     data object Loading : SatelliteDetailUiState()
-    data class Success(val satellite: SatelliteCollection.Member) : SatelliteDetailUiState()
+    data class Success(val satellite: Satellite) : SatelliteDetailUiState()
     data object Error : SatelliteDetailUiState()
 }

@@ -38,7 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.challenge.satellites.R
-import com.challenge.satellites.data.model.SatelliteCollection
+import com.challenge.satellites.domain.model.Satellite
 import com.challenge.satellites.presentation.state.SatelliteDetailUiState
 import com.challenge.satellites.presentation.viewmodel.SatelliteDetailViewModel
 
@@ -65,7 +65,7 @@ fun SatelliteDetailScreen(
 }
 
 @Composable
-fun SatelliteDetail(satellite: SatelliteCollection.Member, backClickCallback: () -> Unit) {
+fun SatelliteDetail(satellite: Satellite, backClickCallback: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -76,7 +76,7 @@ fun SatelliteDetail(satellite: SatelliteCollection.Member, backClickCallback: ()
 }
 
 @Composable
-fun SatelliteInfo(satellite: SatelliteCollection.Member) {
+fun SatelliteInfo(satellite: Satellite) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -107,6 +107,12 @@ fun SatelliteInfo(satellite: SatelliteCollection.Member) {
 
             Spacer(modifier = Modifier.padding(6.dp))
             DetailItems("Line 2", satellite.line2)
+
+            Spacer(modifier = Modifier.padding(3.dp))
+            DetailItems("Inclination", satellite.inclination.toString())
+
+            Spacer(modifier = Modifier.padding(3.dp))
+            DetailItems("Eccentricity", satellite.eccentricity.toString())
 
             Spacer(modifier = Modifier.padding(6.dp))
             DetailItems("Date", satellite.date)
@@ -173,7 +179,7 @@ fun DetailItems(title: String, description: String) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewSatelliteDetail() {
-    val satellite = SatelliteCollection.Member(
+    val satellite = Satellite(
         date = "2025-04-29T04:34:06+00:00",
         id = "https://tle.ivanstanojevic.me/api/tle/25544",
         line2 = "2 25544  51.6352 189.7367 0002491  81.0639 279.0631 15.49383308507563",
@@ -181,6 +187,8 @@ fun PreviewSatelliteDetail() {
         name = "ISS (ZARYA)",
         satelliteId = 25544,
         type = "Tle",
+        inclination = 51.6352,
+        eccentricity = 0.0002491,
     )
 
     SatelliteDetail(satellite = satellite) {
