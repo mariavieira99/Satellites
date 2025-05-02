@@ -9,6 +9,8 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.RawQuery
+import androidx.sqlite.db.SupportSQLiteQuery
 
 @Dao
 interface SatelliteDao {
@@ -16,9 +18,12 @@ interface SatelliteDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(satellites: List<SatelliteEntity>)
 
-    @Query("SELECT * FROM satellites")
+    @Query("SELECT * FROM satellites ORDER BY name ASC LIMIT 35")
     suspend fun getAllSatellites(): List<SatelliteEntity>
 
-    @Query("DELETE FROM satellites")
-    suspend fun clearAll()
+    @RawQuery(observedEntities = [SatelliteEntity::class])
+    suspend fun getFilteredSatellites(query: SupportSQLiteQuery): List<SatelliteEntity>
+
+    @Query("SELECT * FROM satellites WHERE satelliteId = :satelliteId")
+    suspend fun getSatelliteById(satelliteId: Int): SatelliteEntity?
 }

@@ -43,26 +43,27 @@ class SatelliteViewModel @Inject constructor(
     var inclinationOptionSelected: InclinationFilter by mutableStateOf(InclinationFilter.ANY)
     var sortOptionSelected: SatelliteSort by mutableStateOf(SatelliteSort.DEFAULT)
 
-    val networkStatus: StateFlow<Boolean> =
+    private val networkStatus: StateFlow<Boolean> =
         NetworkConnectivityProvider.isConnected.stateIn(
             viewModelScope,
-            SharingStarted.Lazily,
+            SharingStarted.Eagerly,
             true
         )
 
     init {
         viewModelScope.launch {
             _satelliteCollectionUiState.value = SatelliteCollectionUiState.Loading
-            try {
-                val satellites = satelliteUseCase.getApiSatellites(ApiQueryParameters())
-                _satelliteCollectionUiState.value = if (satellites.isNotEmpty()) {
-                    SatelliteCollectionUiState.Success(satellites)
-                } else {
-                    SatelliteCollectionUiState.Error
-                }
-            } catch (e: Exception) {
-                _satelliteCollectionUiState.value = SatelliteCollectionUiState.Error
-                Log.e(TAG, "e=$e")
+            val isOnline = networkStatus.value
+            if (!isOnline) {
+                getDbItems()
+            } else {
+                getApiItems(ApiQueryParameters())
+            }
+        }
+
+        viewModelScope.launch {
+            networkStatus.collect { status ->
+                Log.d(TAG, "network status=$status")
             }
         }
     }
@@ -70,9 +71,39 @@ class SatelliteViewModel @Inject constructor(
     fun getFilteredItems() {
         viewModelScope.launch {
             _satelliteCollectionUiState.value = SatelliteCollectionUiState.Loading
-            try {
+
+            val isOnline = networkStatus.value
+            Log.d(TAG, "getFilteredItems | isOnline=$isOnline")
+
+            if (isOnline) {
                 val queryParameters = getQueryParameters()
-                Log.d(TAG, "getFilteredItems | queryParameters=$queryParameters")
+                getApiItems(queryParameters)
+            } else {
+                getDbItems()
+            }
+        }
+    }
+
+    private fun getDbItems() {
+        viewModelScope.launch {
+            Log.d(TAG, "getDbFilteredItems")
+            val satellites = satelliteUseCase.getDbSatellites(
+                sortOptionSelected,
+                inclinationOptionSelected,
+                eccentricityOptionSelected
+            )
+            _satelliteCollectionUiState.value = if (satellites.isNotEmpty()) {
+                SatelliteCollectionUiState.Success(satellites)
+            } else {
+                SatelliteCollectionUiState.Error
+            }
+        }
+    }
+
+    private fun getApiItems(queryParameters: ApiQueryParameters) {
+        viewModelScope.launch {
+            try {
+                Log.d(TAG, "getApiItems | queryParameters=$queryParameters")
                 val satellites = satelliteUseCase.getApiSatellites(queryParameters)
                 _satelliteCollectionUiState.value = if (satellites.isNotEmpty()) {
                     SatelliteCollectionUiState.Success(satellites)

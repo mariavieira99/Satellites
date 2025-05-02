@@ -8,6 +8,9 @@ package com.challenge.satellites.domain.usecase
 import com.challenge.satellites.data.api.ApiQueryParameters
 import com.challenge.satellites.domain.model.Satellite
 import com.challenge.satellites.domain.repository.SatelliteRepository
+import com.challenge.satellites.presentation.EccentricityFilter
+import com.challenge.satellites.presentation.InclinationFilter
+import com.challenge.satellites.presentation.SatelliteSort
 import javax.inject.Inject
 
 class GetSatelliteUseCase @Inject constructor(private val repository: SatelliteRepository) {
@@ -16,7 +19,19 @@ class GetSatelliteUseCase @Inject constructor(private val repository: SatelliteR
         return repository.getApiSatellites(queryParameters)
     }
 
-    suspend fun getSatelliteById(satelliteId: Int): Satellite? {
-        return repository.getSatelliteById(satelliteId)
+    suspend fun getApiSatelliteById(satelliteId: Int): Satellite? {
+        return repository.getApiSatelliteById(satelliteId)
+    }
+
+    suspend fun getDbSatellites(
+        sort: SatelliteSort,
+        inclinationFilter: InclinationFilter,
+        eccentricityFilter: EccentricityFilter,
+    ): List<Satellite> {
+        return repository.getDbSatellites(sort, inclinationFilter, eccentricityFilter)
+    }
+
+    suspend fun getDbSatelliteById(satelliteId: Int): Satellite? {
+        return repository.getDbSatelliteById(satelliteId)
     }
 }
