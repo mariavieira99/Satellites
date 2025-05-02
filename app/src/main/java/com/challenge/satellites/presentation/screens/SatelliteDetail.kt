@@ -14,12 +14,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.Icon
@@ -30,7 +27,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -41,6 +37,8 @@ import com.challenge.satellites.R
 import com.challenge.satellites.domain.model.Satellite
 import com.challenge.satellites.presentation.state.SatelliteDetailUiState
 import com.challenge.satellites.presentation.viewmodel.SatelliteDetailViewModel
+import com.challenge.satellites.ui.theme.BlueLight
+import com.challenge.satellites.ui.theme.BlueLighter
 
 @Composable
 fun SatelliteDetailScreen(
@@ -69,54 +67,10 @@ fun SatelliteDetail(satellite: Satellite, backClickCallback: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(BlueLight)
     ) {
         BackItem(backClickCallback)
         SatelliteInfo(satellite)
-    }
-}
-
-@Composable
-fun SatelliteInfo(satellite: Satellite) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        contentAlignment = Alignment.TopCenter
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Text(
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally),
-                text = satellite.name,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally),
-                text = "Satellite Id: ${satellite.satelliteId}",
-                style = MaterialTheme.typography.bodyLarge
-            )
-
-            Spacer(modifier = Modifier.padding(12.dp))
-            DetailItems("Line 1", satellite.line1)
-
-            Spacer(modifier = Modifier.padding(6.dp))
-            DetailItems("Line 2", satellite.line2)
-
-            Spacer(modifier = Modifier.padding(3.dp))
-            DetailItems("Inclination", satellite.inclination.toString())
-
-            Spacer(modifier = Modifier.padding(3.dp))
-            DetailItems("Eccentricity", satellite.eccentricity.toString())
-
-            Spacer(modifier = Modifier.padding(6.dp))
-            DetailItems("Date", satellite.date)
-        }
     }
 }
 
@@ -141,7 +95,42 @@ fun BackItem(backClickCallback: () -> Unit) {
 }
 
 @Composable
+fun SatelliteInfo(satellite: Satellite) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        Column(
+            modifier = Modifier.padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                text = satellite.name,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                text = "Satellite Id: ${satellite.satelliteId}",
+                style = MaterialTheme.typography.titleLarge
+            )
+
+            Spacer(modifier = Modifier.padding(12.dp))
+            DetailItems("Line 1", satellite.line1)
+            DetailItems("Line 2", satellite.line2)
+            DetailItems("Inclination", "${satellite.inclination}°")
+            DetailItems("Eccentricity", satellite.eccentricity.toString())
+            DetailItems("Date", satellite.date)
+        }
+    }
+}
+
+@Composable
 fun DetailItems(title: String, description: String) {
+    Spacer(modifier = Modifier.padding(4.dp))
     Text(
         text = title,
         style = MaterialTheme.typography.titleMedium.copy(color = Color.DarkGray),
@@ -153,19 +142,15 @@ fun DetailItems(title: String, description: String) {
                 shape = RoundedCornerShape(8.dp),
             ),
         colors = CardColors(
-            containerColor = Color.LightGray,
+            containerColor = BlueLighter,
             contentColor = Color.Black,
             disabledContentColor = Color.Gray,
             disabledContainerColor = Color.Gray,
         )
     ) {
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(min = 40.dp, max = 200.dp)
-                .verticalScroll(rememberScrollState())
-                .alpha(0.8f)
                 .padding(8.dp)
         ) {
             Text(

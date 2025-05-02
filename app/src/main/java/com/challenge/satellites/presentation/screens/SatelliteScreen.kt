@@ -24,7 +24,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -39,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.challenge.satellites.R
@@ -49,6 +52,10 @@ import com.challenge.satellites.presentation.InclinationFilter
 import com.challenge.satellites.presentation.SatelliteSort
 import com.challenge.satellites.presentation.state.SatelliteCollectionUiState
 import com.challenge.satellites.presentation.viewmodel.SatelliteViewModel
+import com.challenge.satellites.ui.theme.Blue
+import com.challenge.satellites.ui.theme.Blue2
+import com.challenge.satellites.ui.theme.BlueLight
+import com.challenge.satellites.ui.theme.BlueLighter
 
 @Composable
 fun SatelliteScreen(
@@ -58,7 +65,11 @@ fun SatelliteScreen(
 ) {
     val satellitesCollectionUiState = viewModel.satelliteCollectionUiState.collectAsState().value
 
-    Column(modifier = Modifier.padding(innerPadding)) {
+    Column(
+        modifier = Modifier
+            .background(BlueLight)
+            .padding(innerPadding)
+    ) {
         FilterSection(
             onEccentricitySelect = { viewModel.eccentricityOptionSelected = it },
             eccentricityValue = viewModel.eccentricityOptionSelected,
@@ -74,14 +85,19 @@ fun SatelliteScreen(
             is SatelliteCollectionUiState.Loading -> SatelliteLoadingState()
             is SatelliteCollectionUiState.Error -> SatelliteErrorState()
 
-            is SatelliteCollectionUiState.Success -> {
-                LazyColumn {
-                    items(satellitesCollectionUiState.satellites) { satellite ->
-                        SatelliteItem(satellite) {
-                            onItemClickedCallback(it)
-                        }
-                    }
-                }
+            is SatelliteCollectionUiState.Success -> SatelliteItemsList(satellitesCollectionUiState.satellites) {
+                onItemClickedCallback(it)
+            }
+        }
+    }
+}
+
+@Composable
+fun SatelliteItemsList(satellites: List<Satellite>, onItemClickedCallback: (Int) -> (Unit)) {
+    LazyColumn(Modifier.padding(start = 10.dp, end = 10.dp)) {
+        items(satellites) { satellite ->
+            SatelliteItem(satellite) {
+                onItemClickedCallback(it)
             }
         }
     }
@@ -91,40 +107,54 @@ fun SatelliteScreen(
 fun SatelliteItem(satellite: Satellite, onItemClickedCallback: (Int) -> (Unit)) {
     Card(
         shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.elevatedCardElevation(2.dp),
+        elevation = CardDefaults.elevatedCardElevation(10.dp),
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 16.dp)
             .clickable {
                 onItemClickedCallback(satellite.satelliteId)
-            }
+            },
+        colors = CardColors(
+            containerColor = Blue,
+            contentColor = Color.White,
+            disabledContainerColor = Color.Blue,
+            disabledContentColor = Color.Blue
+        )
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             Text(
                 text = satellite.name,
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
+                color = BlueLighter,
             )
 
-            Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
-                Text(
-                    text = satellite.line1,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
+            Text(
+                modifier = Modifier
+                    .horizontalScroll(rememberScrollState())
+                    .background(Blue2),
+                text = satellite.line1,
+                style = MaterialTheme.typography.bodyLarge,
+                color = BlueLighter,
+            )
 
-            Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
-                Text(
-                    text = satellite.line2,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
+            Text(
+                modifier = Modifier
+                    .horizontalScroll(rememberScrollState())
+                    .background(Blue2),
+                text = satellite.line2,
+                style = MaterialTheme.typography.bodyLarge,
+                color = BlueLighter,
+            )
 
-            Row {
-                Text(
-                    text = satellite.date,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            }
+            Text(
+                text = satellite.date,
+                style = MaterialTheme.typography.bodyMedium,
+                color = BlueLighter,
+            )
         }
     }
 }
@@ -132,7 +162,9 @@ fun SatelliteItem(satellite: Satellite, onItemClickedCallback: (Int) -> (Unit)) 
 @Composable
 fun SatelliteLoadingState() {
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(BlueLight),
         contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator(color = Color.Black)
@@ -142,7 +174,9 @@ fun SatelliteLoadingState() {
 @Composable
 fun SatelliteErrorState() {
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(BlueLight),
         contentAlignment = Alignment.Center
     ) {
         Text("Could not load the satellites info. Try again later!")
@@ -164,10 +198,9 @@ fun FilterSection(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 20.dp)
-            .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(12.dp))
+            .background(BlueLighter, shape = RoundedCornerShape(12.dp))
             .padding(16.dp)
     ) {
-        Spacer(Modifier.height(12.dp))
 
         SatelliteFilterDropdown(
             label = "Eccentricity",
@@ -176,16 +209,12 @@ fun FilterSection(
             onSelect = onEccentricitySelect,
         )
 
-        Spacer(Modifier.height(12.dp))
-
         SatelliteFilterDropdown(
             label = "Inclination",
             options = InclinationFilter.entries.toTypedArray(),
             selectedOption = inclinationValue,
             onSelect = onInclinationSelect,
         )
-
-        Spacer(Modifier.height(16.dp))
 
         SatelliteFilterDropdown(
             label = "Sort Asc By",
@@ -194,13 +223,17 @@ fun FilterSection(
             onSelect = onSortSelect,
         )
 
-        Spacer(Modifier.height(16.dp))
-
         Button(
             onClick = onSubmit,
             modifier = Modifier
                 .align(Alignment.End),
-            enabled = uiState != SatelliteCollectionUiState.Loading
+            enabled = uiState != SatelliteCollectionUiState.Loading,
+            colors = ButtonColors(
+                containerColor = Blue,
+                contentColor = Color.White,
+                disabledContainerColor = Color.Gray,
+                disabledContentColor = Color.White,
+            )
         ) {
             Text("Filter")
         }
@@ -218,6 +251,8 @@ fun <T : FilterOption> SatelliteFilterDropdown(
         mutableStateOf(false)
     }
 
+    Spacer(Modifier.height(10.dp))
+
     Column(Modifier.fillMaxWidth()) {
         Text(
             text = label,
@@ -234,7 +269,7 @@ fun <T : FilterOption> SatelliteFilterDropdown(
             ) {
                 Text(text = selectedOption?.label ?: options[0].label)
                 Image(
-                    painter = painterResource(id = R.drawable.baseline_arrow_drop_down_24),
+                    painter = painterResource(id = if (isDropDownExpanded.value) R.drawable.baseline_arrow_drop_up_24 else R.drawable.baseline_arrow_drop_down_24),
                     contentDescription = "DropDown Icon"
                 )
             }
@@ -242,7 +277,9 @@ fun <T : FilterOption> SatelliteFilterDropdown(
                 expanded = isDropDownExpanded.value,
                 onDismissRequest = {
                     isDropDownExpanded.value = false
-                }) {
+                },
+                containerColor = BlueLighter
+            ) {
                 options.forEachIndexed { _, option ->
                     DropdownMenuItem(
                         text = {
@@ -257,3 +294,57 @@ fun <T : FilterOption> SatelliteFilterDropdown(
         }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewSatelliteScreen() {
+    val satellite = Satellite(
+        date = "2025-04-29T04:34:06+00:00",
+        id = "https://tle.ivanstanojevic.me/api/tle/25544",
+        line2 = "2 25544  51.6352 189.7367 0002491  81.0639 279.0631 15.49383308507563",
+        line1 = "1 25544U 98067A   25119.19035294  .00013779  00000+0  25440-3 0  9995",
+        name = "ISS (ZARYA)",
+        satelliteId = 25544,
+        type = "Tle",
+        inclination = 51.6352,
+        eccentricity = 0.0002491,
+    )
+
+    val satelliteList = listOf(satellite, satellite, satellite, satellite, satellite)
+
+    SatelliteItemsList(satellites = satelliteList) {
+        // Do nothing
+    }
+}
+
+
+@Preview
+@Composable
+fun PreviewFilterSection() {
+    val satellite = Satellite(
+        date = "2025-04-29T04:34:06+00:00",
+        id = "https://tle.ivanstanojevic.me/api/tle/25544",
+        line2 = "2 25544  51.6352 189.7367 0002491  81.0639 279.0631 15.49383308507563",
+        line1 = "1 25544U 98067A   25119.19035294  .00013779  00000+0  25440-3 0  9995",
+        name = "ISS (ZARYA)",
+        satelliteId = 25544,
+        type = "Tle",
+        inclination = 51.6352,
+        eccentricity = 0.0002491,
+    )
+
+    val satelliteList = listOf(satellite, satellite, satellite, satellite, satellite)
+
+    FilterSection(
+        { },
+        EccentricityFilter.ANY,
+        { },
+        InclinationFilter.ANY,
+        { },
+        SatelliteSort.DEFAULT,
+        { },
+        SatelliteCollectionUiState.Success(satelliteList)
+    )
+}
+
+
