@@ -5,14 +5,11 @@
 
 package com.challenge.satellites.data.api
 
-enum class SatelliteSort(val value: String) {
-    INCLINATION("inclination"),
-    ECCENTRICITY("eccentricity"),
-    DEFAULT("name")
-}
+import com.challenge.satellites.presentation.SatelliteSort
 
-data class QueryParameters(
-    val sort: String = SatelliteSort.DEFAULT.value,
+
+data class ApiQueryParameters(
+    val sort: String = SatelliteSort.DEFAULT.label,
     val eccentricityGreaterOrEqual: String? = null,
     val eccentricityLessOrEqual: String? = null,
     val inclinationGreater: String? = null,

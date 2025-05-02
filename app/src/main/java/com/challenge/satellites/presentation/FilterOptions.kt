@@ -5,29 +5,37 @@
 
 package com.challenge.satellites.presentation
 
-import com.challenge.satellites.data.api.SatelliteSort
+enum class InclinationFilter(
+    override val label: String,
+    val range: ClosedFloatingPointRange<Double>? = null,
+    val greaterThan: Double? = null,
+    val lessThan: Double? = null,
+) : FilterOption {
+    ANY("Any"),
+    LT_20("< 20°", lessThan = 20.0),
+    BETWEEN_20_60("20–60°", range = 20.0..60.0),
+    BETWEEN_60_100("60–100°", range = 60.0..100.0),
+    GT_100("> 100°", greaterThan = 100.0)
+}
 
+enum class EccentricityFilter(
+    override val label: String,
+    val range: ClosedFloatingPointRange<Double>? = null,
+    val lessThanOrEqual: Double? = null
+) : FilterOption {
+    ANY("Any"),
+    LE_001("Circular (≤ 0.01)", lessThanOrEqual = 0.01),
+    RANGE_001_029("Low elliptical (0.01–0.29)", range = 0.01..0.29),
+    RANGE_03_069("Medium elliptical (0.3–0.69)", range = 0.3..0.69),
+    RANGE_07_099("High elliptical (0.7 - 0.99)", range = 0.7..0.99)
+}
 
-object FilterOptions {
-    val eccentricityOptions = listOf(
-        "Any" to null,
-        "Circular (≤ 0.01)" to Pair(0.0, 0.01),
-        "Low elliptical (0.01–0.29)" to Pair(0.01, 0.3),
-        "Medium elliptical (0.3–0.69)" to Pair(0.3, 0.69),
-        "High elliptical (0.7 - 0.99)" to Pair(0.8, 1.0),
-    )
+enum class SatelliteSort(override val label: String) : FilterOption {
+    INCLINATION("inclination"),
+    ECCENTRICITY("eccentricity"),
+    DEFAULT("name")
+}
 
-    val inclinationOptions = listOf(
-        "Any" to null,
-        "< 20°" to Pair(null, 20.0),
-        "20–60°" to Pair(20.0, 60.0),
-        "60–100°" to Pair(60.0, 100.0),
-        "> 100°" to Pair(100.0, null)
-    )
-
-    val sortOptions = listOf(
-        SatelliteSort.DEFAULT.value to null,
-        SatelliteSort.INCLINATION.value to null,
-        SatelliteSort.ECCENTRICITY.value to null,
-    )
+interface FilterOption {
+    val label: String
 }

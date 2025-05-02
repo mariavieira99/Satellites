@@ -5,6 +5,7 @@
 
 package com.challenge.satellites.data.api
 
+import com.challenge.satellites.presentation.SatelliteSort
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -16,7 +17,7 @@ interface TleApi {
     suspend fun getCollection(
         @Query("page-size") pageSize: Int = PAGE_SIZE,
         @Query("sort-dir") sortDir: String = "asc",
-        @Query("sort") satelliteQuery: String = SatelliteSort.DEFAULT.value,
+        @Query("sort") satelliteQuery: String = SatelliteSort.DEFAULT.label,
         @Query("eccentricity[gte]") eccentricityGreaterOrEqual: String? = null,
         @Query("eccentricity[lte]") eccentricityLessOrEqual: String? = null,
         @Query("inclination[gt]") inclinationGreater: String? = null,

@@ -5,15 +5,15 @@
 
 package com.challenge.satellites.domain.usecase
 
-import com.challenge.satellites.data.api.QueryParameters
+import com.challenge.satellites.data.api.ApiQueryParameters
 import com.challenge.satellites.domain.model.Satellite
 import com.challenge.satellites.domain.repository.SatelliteRepository
 import javax.inject.Inject
 
 class GetSatelliteUseCase @Inject constructor(private val repository: SatelliteRepository) {
 
-    suspend fun getSatellites(queryParameters: QueryParameters): List<Satellite> {
-        return repository.getSatellites(queryParameters)
+    suspend fun getApiSatellites(queryParameters: ApiQueryParameters): List<Satellite> {
+        return repository.getApiSatellites(queryParameters)
     }
 
     suspend fun getSatelliteById(satelliteId: Int): Satellite? {

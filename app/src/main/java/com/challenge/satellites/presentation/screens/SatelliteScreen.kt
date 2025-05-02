@@ -43,7 +43,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.challenge.satellites.R
 import com.challenge.satellites.domain.model.Satellite
-import com.challenge.satellites.presentation.FilterOptions
+import com.challenge.satellites.presentation.EccentricityFilter
+import com.challenge.satellites.presentation.FilterOption
+import com.challenge.satellites.presentation.InclinationFilter
+import com.challenge.satellites.presentation.SatelliteSort
 import com.challenge.satellites.presentation.state.SatelliteCollectionUiState
 import com.challenge.satellites.presentation.viewmodel.SatelliteViewModel
 
@@ -58,10 +61,10 @@ fun SatelliteScreen(
     Column(modifier = Modifier.padding(innerPadding)) {
         FilterSection(
             onEccentricitySelect = { viewModel.eccentricityOptionSelected = it },
-            eccentricityValue = viewModel.eccentricityOptionSelected.first,
+            eccentricityValue = viewModel.eccentricityOptionSelected,
             onInclinationSelect = { viewModel.inclinationOptionSelected = it },
-            inclinationValue = viewModel.inclinationOptionSelected.first,
-            onSortChange = { viewModel.sortOptionSelected = it },
+            inclinationValue = viewModel.inclinationOptionSelected,
+            onSortSelect = { viewModel.sortOptionSelected = it },
             sortValue = viewModel.sortOptionSelected,
             onSubmit = { viewModel.getFilteredItems() },
             uiState = satellitesCollectionUiState,
@@ -148,12 +151,12 @@ fun SatelliteErrorState() {
 
 @Composable
 fun FilterSection(
-    onEccentricitySelect: (Pair<String, Pair<Double?, Double?>?>) -> Unit,
-    eccentricityValue: String,
-    onInclinationSelect: (Pair<String, Pair<Double?, Double?>?>) -> Unit,
-    inclinationValue: String,
-    onSortChange: (String) -> Unit,
-    sortValue: String,
+    onEccentricitySelect: (EccentricityFilter) -> Unit,
+    eccentricityValue: EccentricityFilter,
+    onInclinationSelect: (InclinationFilter) -> Unit,
+    inclinationValue: InclinationFilter,
+    onSortSelect: (SatelliteSort) -> Unit,
+    sortValue: SatelliteSort,
     onSubmit: () -> Unit,
     uiState: SatelliteCollectionUiState,
 ) {
@@ -168,8 +171,8 @@ fun FilterSection(
 
         SatelliteFilterDropdown(
             label = "Eccentricity",
-            options = FilterOptions.eccentricityOptions,
-            value = eccentricityValue,
+            options = EccentricityFilter.entries.toTypedArray(),
+            selectedOption = eccentricityValue,
             onSelect = onEccentricitySelect,
         )
 
@@ -177,8 +180,8 @@ fun FilterSection(
 
         SatelliteFilterDropdown(
             label = "Inclination",
-            options = FilterOptions.inclinationOptions,
-            value = inclinationValue,
+            options = InclinationFilter.entries.toTypedArray(),
+            selectedOption = inclinationValue,
             onSelect = onInclinationSelect,
         )
 
@@ -186,11 +189,9 @@ fun FilterSection(
 
         SatelliteFilterDropdown(
             label = "Sort Asc By",
-            options = FilterOptions.sortOptions,
-            value = sortValue,
-            onSelect = {
-                onSortChange(it.first)
-            },
+            options = SatelliteSort.entries.toTypedArray(),
+            selectedOption = sortValue,
+            onSelect = onSortSelect,
         )
 
         Spacer(Modifier.height(16.dp))
@@ -207,11 +208,11 @@ fun FilterSection(
 }
 
 @Composable
-fun SatelliteFilterDropdown(
+fun <T : FilterOption> SatelliteFilterDropdown(
     label: String,
-    options: List<Pair<String, Pair<Double?, Double?>?>>,
-    value: String?,
-    onSelect: (Pair<String, Pair<Double?, Double?>?>) -> Unit
+    options: Array<T>,
+    selectedOption: T?,
+    onSelect: (T) -> Unit,
 ) {
     val isDropDownExpanded = remember {
         mutableStateOf(false)
@@ -231,7 +232,7 @@ fun SatelliteFilterDropdown(
                     isDropDownExpanded.value = true
                 }
             ) {
-                Text(text = value ?: options[0].first)
+                Text(text = selectedOption?.label ?: options[0].label)
                 Image(
                     painter = painterResource(id = R.drawable.baseline_arrow_drop_down_24),
                     contentDescription = "DropDown Icon"
@@ -245,7 +246,7 @@ fun SatelliteFilterDropdown(
                 options.forEachIndexed { _, option ->
                     DropdownMenuItem(
                         text = {
-                            Text(option.first)
+                            Text(option.label)
                         },
                         onClick = {
                             onSelect(option)
@@ -255,5 +256,4 @@ fun SatelliteFilterDropdown(
             }
         }
     }
-
 }

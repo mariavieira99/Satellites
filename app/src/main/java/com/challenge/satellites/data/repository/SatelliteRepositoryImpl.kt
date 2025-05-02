@@ -6,7 +6,7 @@
 package com.challenge.satellites.data.repository
 
 import android.util.Log
-import com.challenge.satellites.data.api.QueryParameters
+import com.challenge.satellites.data.api.ApiQueryParameters
 import com.challenge.satellites.data.api.TleApi
 import com.challenge.satellites.data.local.SatelliteDatabase
 import com.challenge.satellites.data.local.SatelliteEntity
@@ -27,7 +27,7 @@ class SatelliteRepositoryImpl @Inject constructor(
     private val db: SatelliteDatabase
 ) : SatelliteRepository {
 
-    override suspend fun getSatellites(queryParameters: QueryParameters): List<Satellite> =
+    override suspend fun getApiSatellites(queryParameters: ApiQueryParameters): List<Satellite> =
         withContext(Dispatchers.IO) {
         try {
             Log.d(TAG, "getSatellites | queryParameters=$queryParameters")

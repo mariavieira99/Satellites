@@ -16,18 +16,27 @@ import androidx.navigation.navArgument
 import com.challenge.satellites.presentation.screens.SatelliteDetailScreen
 import com.challenge.satellites.presentation.screens.SatelliteScreen
 import com.challenge.satellites.ui.theme.SatellitesTheme
+import com.challenge.satellites.utils.NetworkConnectivityProvider
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        NetworkConnectivityProvider.init(this)
+        NetworkConnectivityProvider.registerCallback()
+
         enableEdgeToEdge()
         setContent {
             SatellitesTheme {
                 SatelliteApp()
             }
         }
+    }
+
+    override fun onDestroy() {
+        NetworkConnectivityProvider.unregisterCallback()
+        super.onDestroy()
     }
 }
 
