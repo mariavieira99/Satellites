@@ -14,11 +14,11 @@ import com.challenge.satellites.data.local.SatelliteDatabase
 import com.challenge.satellites.data.local.SatelliteEntity
 import com.challenge.satellites.data.mapper.toSatellite
 import com.challenge.satellites.data.mapper.toSatelliteEntity
-import com.challenge.satellites.domain.model.Satellite
 import com.challenge.satellites.domain.repository.SatelliteRepository
 import com.challenge.satellites.presentation.EccentricityFilter
 import com.challenge.satellites.presentation.InclinationFilter
 import com.challenge.satellites.presentation.SatelliteSort
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -29,39 +29,41 @@ private const val TAG = "SatelliteRepositoryImpl"
 
 class SatelliteRepositoryImpl @Inject constructor(
     private val api: TleApi,
-    private val db: SatelliteDatabase
+    private val db: SatelliteDatabase,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : SatelliteRepository {
 
     // region API
 
-    override suspend fun getApiSatellites(queryParameters: ApiQueryParameters): List<Satellite> =
-        withContext(Dispatchers.IO) {
-        try {
-            Log.d(TAG, "getSatellites | queryParameters=$queryParameters")
-            val satellitesDto = api.getCollection(
-                satelliteQuery = queryParameters.sort,
-                eccentricityGreaterOrEqual = queryParameters.eccentricityGreaterOrEqual,
-                eccentricityLessOrEqual = queryParameters.eccentricityLessOrEqual,
-                inclinationGreater = queryParameters.inclinationGreater,
-                inclinationLess = queryParameters.inclinationLess
-            )
+    override suspend fun getApiSatellites(queryParameters: ApiQueryParameters) =
+        withContext(ioDispatcher) {
+            try {
+                Log.d(TAG, "getSatellites | queryParameters=$queryParameters")
+                val satellitesDto = api.getCollection(
+                    satelliteQuery = queryParameters.sort,
+                    eccentricityGreaterOrEqual = queryParameters.eccentricityGreaterOrEqual,
+                    eccentricityLessOrEqual = queryParameters.eccentricityLessOrEqual,
+                    inclinationGreater = queryParameters.inclinationGreater,
+                    inclinationLess = queryParameters.inclinationLess
+                )
 
-            Log.d(TAG, "getSatellites | satellitesDtoSize=${satellitesDto.view}")
-            val satellites = satellitesDto.member.map { it.toSatelliteEntity() }
-            launch {
-                Log.d(TAG, "insert into db")
-                saveSatellitesToDb(satellites)
+                val satellites = satellitesDto.member.map { it.toSatelliteEntity() }
+                Log.d(TAG, "getSatellites | satellitesSize=${satellites.size}")
+
+                launch {
+                    Log.d(TAG, "Insert into db")
+                    saveSatellitesToDb(satellites)
+                }
+
+                satellites.map { it.toSatellite() }
+
+            } catch (e: SocketTimeoutException) {
+                Log.e(TAG, "Request timed out=$e")
+                return@withContext emptyList()
+            } catch (e: Exception) {
+                Log.e(TAG, "Exception caught=$e")
+                return@withContext emptyList()
             }
-
-            satellites.map { it.toSatellite() }
-
-        } catch (e: SocketTimeoutException) {
-            Log.e(TAG, "Request timed out=$e")
-            return@withContext emptyList()
-        } catch (e: Exception) {
-            Log.e(TAG, "Exception caught=$e")
-            return@withContext emptyList()
-        }
     }
 
     override suspend fun getApiSatelliteById(satelliteId: Int) = withContext(Dispatchers.IO) {
@@ -84,15 +86,24 @@ class SatelliteRepositoryImpl @Inject constructor(
         sort: SatelliteSort,
         inclinationFilter: InclinationFilter,
         eccentricityFilter: EccentricityFilter,
-    ): List<Satellite> {
+    ) = withContext(ioDispatcher) {
+        val startTime = System.currentTimeMillis()
         if (sort == SatelliteSort.DEFAULT && inclinationFilter == InclinationFilter.ANY && eccentricityFilter == EccentricityFilter.ANY) {
-            Log.d(TAG, "getDbSatellites | retrieve default items")
-            return db.dao.getAllSatellites().map { it.toSatellite() }
+            val dbSatellites = db.dao.getAllSatellites()
+            Log.d(
+                TAG,
+                "getDbSatellites | retrieve default items, finishedIn=${System.currentTimeMillis() - startTime}ms"
+            )
+            return@withContext dbSatellites.map { it.toSatellite() }
         }
+
         val query = buildQuery(sort, inclinationFilter, eccentricityFilter)
         val satellites = db.dao.getFilteredSatellites(query)
-        Log.d(TAG, "getDbSatellites | satellites=${satellites.size}")
-        return satellites.map { it.toSatellite() }
+        Log.d(
+            TAG,
+            "getDbSatellites | satellites=${satellites.size}, finishedIn=${System.currentTimeMillis() - startTime}ms"
+        )
+        return@withContext satellites.map { it.toSatellite() }
     }
 
     private fun buildQuery(
@@ -155,11 +166,10 @@ class SatelliteRepositoryImpl @Inject constructor(
 
     private suspend fun saveSatellitesToDb(satellites: List<SatelliteEntity>) {
         db.dao.insertAll(satellites)
-        Log.d(TAG, "finished")
     }
 
-    override suspend fun getDbSatelliteById(satelliteId: Int): Satellite? {
-        return db.dao.getSatelliteById(satelliteId)?.toSatellite()
+    override suspend fun getDbSatelliteById(satelliteId: Int) = withContext(ioDispatcher) {
+        db.dao.getSatelliteById(satelliteId)?.toSatellite()
     }
 
     // endregion

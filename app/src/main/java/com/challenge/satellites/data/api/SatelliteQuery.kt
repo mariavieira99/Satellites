@@ -7,7 +7,6 @@ package com.challenge.satellites.data.api
 
 import com.challenge.satellites.presentation.SatelliteSort
 
-
 data class ApiQueryParameters(
     val sort: String = SatelliteSort.DEFAULT.label,
     val eccentricityGreaterOrEqual: String? = null,

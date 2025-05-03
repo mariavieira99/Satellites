@@ -5,6 +5,7 @@
 
 package com.challenge.satellites.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.challenge.satellites.domain.usecase.GetSatelliteUseCase
@@ -17,6 +18,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+private const val TAG = "SatelliteDetailViewModel"
 
 @HiltViewModel
 class SatelliteDetailViewModel @Inject constructor(
@@ -38,23 +41,34 @@ class SatelliteDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _satelliteDetailUiState.value = SatelliteDetailUiState.Loading
             if (networkStatus.value) {
-                try {
-                    val result = satelliteUseCase.getApiSatelliteById(satelliteId) ?: run {
-                        _satelliteDetailUiState.value = SatelliteDetailUiState.Error
-                        return@launch
-                    }
-                    _satelliteDetailUiState.value = SatelliteDetailUiState.Success(result)
-                } catch (e: Exception) {
-                    _satelliteDetailUiState.value = SatelliteDetailUiState.Error
-                }
+                getApiSatelliteInfo(satelliteId)
             } else {
-                val result = satelliteUseCase.getDbSatelliteById(satelliteId) ?: run {
-                    _satelliteDetailUiState.value = SatelliteDetailUiState.Error
-                    return@launch
-                }
-                _satelliteDetailUiState.value = SatelliteDetailUiState.Success(result)
+                getDbSatelliteInfo(satelliteId)
             }
 
         }
+    }
+
+    private suspend fun getApiSatelliteInfo(satelliteId: Int) {
+        try {
+            Log.d(TAG, "getApiSatelliteInfo | satelliteId=$satelliteId")
+            val result = satelliteUseCase.getApiSatelliteById(satelliteId) ?: run {
+                _satelliteDetailUiState.value = SatelliteDetailUiState.Error
+                return
+            }
+            _satelliteDetailUiState.value = SatelliteDetailUiState.Success(result)
+        } catch (e: Exception) {
+            Log.e(TAG, "e=$e")
+            _satelliteDetailUiState.value = SatelliteDetailUiState.Error
+        }
+    }
+
+    private suspend fun getDbSatelliteInfo(satelliteId: Int) {
+        Log.d(TAG, "getDbSatelliteInfo | satelliteId=$satelliteId")
+        val result = satelliteUseCase.getDbSatelliteById(satelliteId) ?: run {
+            _satelliteDetailUiState.value = SatelliteDetailUiState.Error
+            return
+        }
+        _satelliteDetailUiState.value = SatelliteDetailUiState.Success(result)
     }
 }

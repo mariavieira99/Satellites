@@ -113,8 +113,8 @@ class SatelliteViewModel @Inject constructor(
                     SatelliteCollectionUiState.Error
                 }
             } catch (e: Exception) {
-                _satelliteCollectionUiState.value = SatelliteCollectionUiState.Error
                 Log.e(TAG, "e=$e")
+                _satelliteCollectionUiState.value = SatelliteCollectionUiState.Error
             }
         }
     }
