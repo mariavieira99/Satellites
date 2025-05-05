@@ -47,7 +47,7 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideMusicApi(retrofit: Retrofit): TleApi {
+    fun provideSatellitesApi(retrofit: Retrofit): TleApi {
         return retrofit.create(TleApi::class.java)
     }
 
